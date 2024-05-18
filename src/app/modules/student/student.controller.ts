@@ -1,20 +1,29 @@
 import { Request, Response } from 'express';
 import { StudentService } from './student.service';
+import studentValidationSchema from './student.validator';
 
 const createStudent = async (req: Request, res: Response) => {
   try {
     const { student: studentData } = req.body;
+
+    // student validation  Zad using
+    const zodParsedData = studentValidationSchema.parse(studentData);
     // will call service function  to send this data business logic all append services file
-    const result = await StudentService.createStudentInDB(studentData);
+    const result = await StudentService.createStudentInDB(zodParsedData);
 
     // send response
 
     res.status(200).json({
       success: true,
-      message: 'Student created successfully',
+      message: 'student created successfully',
       data: result,
     });
   } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'student are not created ',
+      data: err,
+    });
     console.log(err);
   }
 };

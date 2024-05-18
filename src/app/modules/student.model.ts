@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import validator from 'validator';
 import {
   Guardian,
   LocalGuardian,
@@ -14,13 +15,13 @@ const userNameSchema = new Schema<UserName>({
     maxLength: [20, 'First name can not exceed 20 characters'],
 
     // validation functions
-    validate: {
-      validator: function (value: string) {
-        const capitalizedStr = value.charAt(0).toUpperCase() + value.slice(1);
-        return capitalizedStr === value;
-      },
-      message: '{VALUE} is not in capitalized format',
-    },
+    // validate: {
+    //   validator: function (value: string) {
+    //     const capitalizedStr = value.charAt(0).toUpperCase() + value.slice(1);
+    //     return capitalizedStr === value;
+    //   },
+    //   message: '{VALUE} is not in capitalized format',
+    // },
   },
   middleName: {
     type: String,
@@ -30,6 +31,11 @@ const userNameSchema = new Schema<UserName>({
     type: String,
     trim: true,
     required: [true, 'Last Name is required'],
+    //   validate: {
+    //     validator: (value: string) => validator.isAlpha(value),
+    //   },
+    //   message: '{VALUE} is not valid',
+    // },
   },
 });
 
@@ -57,11 +63,11 @@ const studentSchema = new Schema<Student>({
   },
   gender: {
     type: String,
-    enum: {
-      values: ['male', 'female', 'other'],
-      message:
-        "The gender field can only be one of the following :'male','female', or :'other'.",
-    },
+    // enum: {
+    //   values: ['male', 'female', 'other'],
+    //   message:
+    //     "The gender field can only be one of the following :'male','female', or :'other'.",
+    // },
   },
   dateOfBirth: Date,
   email: {
@@ -70,6 +76,7 @@ const studentSchema = new Schema<Student>({
     required: true,
     unique: true,
     lowercase: true,
+    validate: [validator.isEmail, 'Please enter a valid email'],
   },
   contactNo: {
     type: String,
