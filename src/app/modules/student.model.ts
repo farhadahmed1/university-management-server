@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import validator from 'validator';
+import bcrypt from 'bcrypt';
 import {
   StudentMethods,
   StudentModel,
@@ -8,6 +9,7 @@ import {
   TStudent,
   TUserName,
 } from './student/student.interface';
+import config from '../config';
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -58,7 +60,12 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 });
 
 const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>({
-  id: { type: String, required: true, unique: true }, // Assuming 'id' is a student ID
+  id: { type: String, required: [true, 'Id is required '], unique: true },
+  password: {
+    type: String,
+    required: [true, 'Password is required '],
+    maxLength: [20, 'Password can not more then be 20 characters'],
+  }, // Assuming 'id' is a student ID
   name: {
     type: userNameSchema,
     required: true,
@@ -101,7 +108,39 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>({
   },
   profileImg: String,
   isActive: { type: String, enum: ['active', 'disabled'], default: 'active' },
+  isDeleted: { type: Boolean, default: false },
 });
+
+// document middleware
+// create a pre save middleware
+studentSchema.pre('save', async function (next) {
+  // console.log(this, ' post hook : we saved our data');
+  const user = this;
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_rounds),
+  );
+  next();
+});
+// create a post save middleware password hashing
+studentSchema.post('save', async function (doc, next) {
+  doc.password = '';
+  next();
+});
+// Query middleware
+studentSchema.pre('find', async function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+studentSchema.pre('findOne', async function (next) {
+  this.findOne({ isDeleted: { $ne: true } });
+  next();
+});
+studentSchema.pre('aggregate', async function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  next();
+});
+// creating a custom method
 
 studentSchema.methods.isUserExists = async function name(id: string) {
   const existingStudent = await Student.findOne({ id });
