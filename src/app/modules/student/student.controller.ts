@@ -79,9 +79,31 @@ const deleteStudent = async (req: Request, res: Response) => {
     });
   }
 };
+const updateSingleStudent = async (req: Request, res: Response) => {
+  try {
+    const { studentId } = req.params;
+    const updateFields = req.body;
+    const result = await StudentService.updateStudentFromDB(
+      studentId,
+      updateFields,
+    );
+    res.status(200).json({
+      success: true,
+      message: 'Student is updated successfully',
+      data: result,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Something went wrong',
+      data: err,
+    });
+  }
+};
 export const StudentController = {
   createStudent,
   getAllStudents,
   getSingleStudent,
   deleteStudent,
+  updateSingleStudent,
 };

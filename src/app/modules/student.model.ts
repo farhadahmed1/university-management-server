@@ -59,56 +59,76 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
   address: { type: String, required: true },
 });
 
-const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>({
-  id: { type: String, required: [true, 'Id is required '], unique: true },
-  password: {
-    type: String,
-    required: [true, 'Password is required '],
-    maxLength: [20, 'Password can not more then be 20 characters'],
-  }, // Assuming 'id' is a student ID
-  name: {
-    type: userNameSchema,
-    required: true,
+const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
+  {
+    id: { type: String, required: [true, 'Id is required '], unique: true },
+    password: {
+      type: String,
+      required: [true, 'Password is required '],
+      maxLength: [20, 'Password can not more then be 20 characters'],
+    }, // Assuming 'id' is a student ID
+    name: {
+      type: userNameSchema,
+      required: true,
+    },
+    gender: {
+      type: String,
+      // enum: {
+      //   values: ['male', 'female', 'other'],
+      //   message:
+      //     "The gender field can only be one of the following :'male','female', or :'other'.",
+      // },
+    },
+    dateOfBirth: Date,
+    email: {
+      type: String,
+      trim: true,
+      required: true,
+      unique: true,
+      lowercase: true,
+      validate: [validator.isEmail, 'Please enter a valid email'],
+    },
+    contactNo: {
+      type: String,
+      required: [true, 'Contact number is required'],
+    },
+    emergencyContact: String,
+    bloodGroup: {
+      type: String,
+      enum: ['A+', 'B+', 'AB+', 'O+', 'A-', 'B-', 'AB-', 'O-'],
+    },
+    permanentAddress: String,
+    presentAddress: { type: String, required: true },
+    guardian: {
+      type: guardianSchema,
+      required: true,
+    },
+    localGuardian: {
+      type: localGuardianSchema,
+      required: true,
+    },
+    profileImg: String,
+    isActive: { type: String, enum: ['active', 'disabled'], default: 'active' },
+    isDeleted: { type: Boolean, default: false },
   },
-  gender: {
-    type: String,
-    // enum: {
-    //   values: ['male', 'female', 'other'],
-    //   message:
-    //     "The gender field can only be one of the following :'male','female', or :'other'.",
-    // },
+  {
+    toJSON: {
+      virtuals: true,
+    },
   },
-  dateOfBirth: Date,
-  email: {
-    type: String,
-    trim: true,
-    required: true,
-    unique: true,
-    lowercase: true,
-    validate: [validator.isEmail, 'Please enter a valid email'],
-  },
-  contactNo: {
-    type: String,
-    required: [true, 'Contact number is required'],
-  },
-  emergencyContact: String,
-  bloodGroup: {
-    type: String,
-    enum: ['A+', 'B+', 'AB+', 'O+', 'A-', 'B-', 'AB-', 'O-'],
-  },
-  permanentAddress: String,
-  presentAddress: { type: String, required: true },
-  guardian: {
-    type: guardianSchema,
-    required: true,
-  },
-  localGuardian: {
-    type: localGuardianSchema,
-    required: true,
-  },
-  profileImg: String,
-  isActive: { type: String, enum: ['active', 'disabled'], default: 'active' },
-  isDeleted: { type: Boolean, default: false },
+);
+
+//virtual added
+
+studentSchema.virtual('fullName').get(function () {
+  return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+});
+
+studentSchema.virtual('fullName').set(function (fullName: string) {
+  const [firstName, middleName, lastName] = fullName.split(' ');
+  this.name.firstName = firstName;
+  this.name.middleName = middleName;
+  this.name.lastName = lastName;
 });
 
 // document middleware

@@ -24,9 +24,15 @@ const deleteStudentsFromDB = async (id: string) => {
   const result = await Student.updateOne({ id }, { isDeleted: true });
   return result;
 };
+
+const updateStudentFromDB = async (id: string, updateFields: any) => {
+  const result = await Student.updateOne({ id }, { $set: updateFields });
+  return result;
+};
 export const StudentService = {
   createStudentInDB,
   getAllStudentsFromDB,
   getSingleStudentsFromDB,
   deleteStudentsFromDB,
+  updateStudentFromDB,
 };
