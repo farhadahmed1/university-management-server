@@ -8,8 +8,8 @@ import {
   TLocalGuardian,
   TStudent,
   TUserName,
-} from './student/student.interface';
-import config from '../config';
+} from './student.interface';
+import config from '../../config';
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -62,6 +62,12 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
   {
     id: { type: String, required: [true, 'Id is required '], unique: true },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'User Id is required '],
+      unique: true,
+    },
     password: {
       type: String,
       required: [true, 'Password is required '],

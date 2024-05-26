@@ -1,4 +1,4 @@
-import { Student } from '../student.model';
+import { Student } from './student.model';
 import { TStudent } from './student.interface';
 
 const createStudentInDB = async (studentData: TStudent) => {
@@ -29,6 +29,7 @@ const updateStudentFromDB = async (id: string, updateFields: any) => {
   const result = await Student.updateOne({ id }, { $set: updateFields });
   return result;
 };
+
 export const StudentService = {
   createStudentInDB,
   getAllStudentsFromDB,
