@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { TUser } from './user.interface';
-
+import config from '../../config';
+import bcrypt from 'bcrypt';
 const userSchema = new Schema(
   {
     id: {
@@ -36,5 +37,21 @@ const userSchema = new Schema(
     timestamps: true,
   },
 );
+// create a pre save middleware password hashing
+// password hash before send data in database
+userSchema.pre('save', async function (next) {
+  const user = this;
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_rounds),
+  );
+  next();
+});
+// create a post save middleware password ""
+// set '' after saving the password
+userSchema.post('save', async function (doc, next) {
+  doc.password = '';
+  next();
+});
 
 export const User = model<TUser>('User', userSchema);

@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import validator from 'validator';
-import bcrypt from 'bcrypt';
+// import bcrypt from 'bcrypt';
 import {
   StudentMethods,
   StudentModel,
@@ -9,7 +9,7 @@ import {
   TStudent,
   TUserName,
 } from './student.interface';
-import config from '../../config';
+//import config from '../../config';
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -61,29 +61,25 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 
 const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
   {
-    id: { type: String, required: [true, 'Id is required '], unique: true },
+    id: { type: String, required: [true, 'Id is required '] },
     user: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'User Id is required '],
       unique: true,
     },
-    password: {
-      type: String,
-      required: [true, 'Password is required '],
-      maxLength: [20, 'Password can not more then be 20 characters'],
-    }, // Assuming 'id' is a student ID
+    // password: {
+    //   type: String,
+    //   required: [true, 'Password is required '],
+    //   maxLength: [20, 'Password can not more then be 20 characters'],
+    // }, // Assuming 'id' is a student ID
     name: {
       type: userNameSchema,
       required: true,
     },
     gender: {
       type: String,
-      // enum: {
-      //   values: ['male', 'female', 'other'],
-      //   message:
-      //     "The gender field can only be one of the following :'male','female', or :'other'.",
-      // },
+      required: [true, 'Gender is required '],
     },
     dateOfBirth: Date,
     email: {
@@ -139,20 +135,22 @@ studentSchema.virtual('fullName').set(function (fullName: string) {
 
 // document middleware
 // create a pre save middleware
-studentSchema.pre('save', async function (next) {
-  // console.log(this, ' post hook : we saved our data');
-  const user = this;
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_salt_rounds),
-  );
-  next();
-});
-// create a post save middleware password hashing
-studentSchema.post('save', async function (doc, next) {
-  doc.password = '';
-  next();
-});
+//  bcrypt password
+// studentSchema.pre('save', async function (next) {
+//   // console.log(this, ' post hook : we saved our data');
+//   const user = this;
+//   user.password = await bcrypt.hash(
+//     user.password,
+//     Number(config.bcrypt_salt_rounds),
+//   );
+//   next();
+// });
+// // create a post save middleware password hashing
+// studentSchema.post('save', async function (doc, next) {
+//   doc.password = '';
+//   next();
+// });
+
 // Query middleware
 studentSchema.pre('find', async function (next) {
   this.find({ isDeleted: { $ne: true } });
