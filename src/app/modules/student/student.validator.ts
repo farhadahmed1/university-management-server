@@ -36,31 +36,37 @@ const localGuardianValidationSchema = z.object({
   address: z.string(),
 });
 
-const studentValidationSchema = z.object({
-  id: z.string(),
-  // password: z.string().max(20),
-  name: userNameValidationSchema,
-  gender: z.enum(['male', 'female', 'other'], {
-    errorMap: () => ({
-      message: "The gender field can only be 'male', 'female', or 'other'.",
+const createStudentValidationSchema = z.object({
+  body: z.object({
+    password: z.string().max(20),
+    student: z.object({
+      name: userNameValidationSchema,
+      gender: z.enum(['male', 'female', 'other'], {
+        errorMap: () => ({
+          message: "The gender field can only be 'male', 'female', or 'other'.",
+        }),
+      }),
+      dateOfBirth: z.preprocess((arg) => {
+        if (typeof arg === 'string' || arg instanceof Date)
+          return new Date(arg);
+      }, z.date().optional()),
+      email: z.string().trim().email('Please enter a valid email'),
+      contactNo: z.string(),
+      emergencyContact: z.string().optional(),
+      bloodGroup: z
+        .enum(['A+', 'B+', 'AB+', 'O+', 'A-', 'B-', 'AB-', 'O-'])
+        .optional(),
+      permanentAddress: z.string().optional(),
+      presentAddress: z.string(),
+      guardian: guardianValidationSchema,
+      localGuardian: localGuardianValidationSchema,
+      profileImg: z.string().optional(),
+      isActive: z.enum(['active', 'disabled']).default('active'),
+      isDeleted: z.boolean().default(false),
     }),
   }),
-  dateOfBirth: z.preprocess((arg) => {
-    if (typeof arg === 'string' || arg instanceof Date) return new Date(arg);
-  }, z.date().optional()),
-  email: z.string().trim().email('Please enter a valid email'),
-  contactNo: z.string(),
-  emergencyContact: z.string().optional(),
-  bloodGroup: z
-    .enum(['A+', 'B+', 'AB+', 'O+', 'A-', 'B-', 'AB-', 'O-'])
-    .optional(),
-  permanentAddress: z.string().optional(),
-  presentAddress: z.string(),
-  guardian: guardianValidationSchema,
-  localGuardian: localGuardianValidationSchema,
-  profileImg: z.string().optional(),
-  isActive: z.enum(['active', 'disabled']).default('active'),
-  isDeleted: z.boolean().default(false),
 });
 
-export default studentValidationSchema;
+export const studentValidations = {
+  createStudentValidationSchema,
+};
