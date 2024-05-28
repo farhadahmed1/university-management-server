@@ -1,17 +1,9 @@
-import {
-  TAcademicSemester,
-  TAcademicSemesterNameCodeMapper,
-} from './academicSemester.interface';
+import { academicSemesterNameCodeMapper } from './academicSemester.constant';
+import { TAcademicSemester } from './academicSemester.interface';
 import { AcademicSemester } from './academicSemester.model';
 
 const createAcademicSemesterIntoDB = async (payload: TAcademicSemester) => {
   // semester name --> semester code
-
-  const academicSemesterNameCodeMapper: TAcademicSemesterNameCodeMapper = {
-    Autumn: '01',
-    Summer: '02',
-    Fall: '03',
-  };
 
   // Fall
   if (academicSemesterNameCodeMapper[payload.name] !== payload.code) {
@@ -32,11 +24,18 @@ const getSingleAcademicSemesterIntoDB = async (_id: string) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const updateAcademicSemesterIntoDB = async (_id: string, updateFields: any) => {
-  const result = await AcademicSemester.updateOne(
-    { _id },
-    { $set: updateFields },
-  );
+const updateAcademicSemesterIntoDB = async (
+  _id: string,
+  payload: Partial<TAcademicSemester>,
+) => {
+  if (
+    payload.name &&
+    payload.code &&
+    academicSemesterNameCodeMapper[payload.name] !== payload.code
+  ) {
+    throw new Error('Academic Semester Name and Code does not match');
+  }
+  const result = await AcademicSemester.updateOne({ _id }, { $set: payload });
   return result;
 };
 
