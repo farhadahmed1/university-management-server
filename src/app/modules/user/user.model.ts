@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import { TUser } from './user.interface';
 import config from '../../config';
 import bcrypt from 'bcrypt';
-const userSchema = new Schema(
+const userSchema = new Schema<TUser>(
   {
     id: {
       type: String,
@@ -41,6 +41,7 @@ const userSchema = new Schema(
 // create a pre save middleware password hashing
 // password hash before send data in database
 userSchema.pre('save', async function (next) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this;
   user.password = await bcrypt.hash(
     user.password,

@@ -2,7 +2,6 @@ import { Schema, model } from 'mongoose';
 import validator from 'validator';
 // import bcrypt from 'bcrypt';
 import {
-  StudentMethods,
   StudentModel,
   TGuardian,
   TLocalGuardian,
@@ -17,15 +16,6 @@ const userNameSchema = new Schema<TUserName>({
     trim: true,
     required: [true, 'First Name is required'],
     maxLength: [20, 'First name can not exceed 20 characters'],
-
-    // validation functions
-    // validate: {
-    //   validator: function (value: string) {
-    //     const capitalizedStr = value.charAt(0).toUpperCase() + value.slice(1);
-    //     return capitalizedStr === value;
-    //   },
-    //   message: '{VALUE} is not in capitalized format',
-    // },
   },
   middleName: {
     type: String,
@@ -35,31 +25,58 @@ const userNameSchema = new Schema<TUserName>({
     type: String,
     trim: true,
     required: [true, 'Last Name is required'],
-    //   validate: {
-    //     validator: (value: string) => validator.isAlpha(value),
-    //   },
-    //   message: '{VALUE} is not valid',
-    // },
   },
 });
 
 const guardianSchema = new Schema<TGuardian>({
-  fatherName: String,
-  fatherOccupation: String,
-  fatherContactNo: String,
-  motherName: String,
-  motherOccupation: String,
-  motherContactNo: String,
+  fatherName: {
+    type: String,
+    trim: true,
+    required: [true, 'Father Name is required'],
+  },
+  fatherOccupation: {
+    type: String,
+    trim: true,
+    required: [true, 'Father occupation is required'],
+  },
+  fatherContactNo: {
+    type: String,
+    required: [true, 'Father Contact No is required'],
+  },
+  motherName: {
+    type: String,
+    required: [true, 'Mother Name is required'],
+  },
+  motherOccupation: {
+    type: String,
+    required: [true, 'Mother occupation is required'],
+  },
+  motherContactNo: {
+    type: String,
+    required: [true, 'Mother Contact No is required'],
+  },
 });
 
 const localGuardianSchema = new Schema<TLocalGuardian>({
-  name: { type: String, trim: true, required: true },
-  occupation: String,
-  contactNo: String,
-  address: { type: String, required: true },
+  name: {
+    type: String,
+    required: [true, 'Name is required'],
+  },
+  occupation: {
+    type: String,
+    required: [true, 'Occupation is required'],
+  },
+  contactNo: {
+    type: String,
+    required: [true, 'Contact number is required'],
+  },
+  address: {
+    type: String,
+    required: [true, 'Address is required'],
+  },
 });
 
-const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
+const studentSchema = new Schema<TStudent, StudentModel>(
   {
     id: { type: String, unique: true, required: [true, 'Id is required '] },
     user: {
@@ -68,20 +85,22 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
       required: [true, 'User Id is required '],
       unique: true,
     },
-    // password: {
-    //   type: String,
-    //   required: [true, 'Password is required '],
-    //   maxLength: [20, 'Password can not more then be 20 characters'],
-    // }, // Assuming 'id' is a student ID
     name: {
       type: userNameSchema,
       required: true,
     },
     gender: {
       type: String,
+      enum: {
+        values: ['male', 'female', 'other'],
+        message: '{VALUE} is not a valid gender',
+      },
       required: [true, 'Gender is required '],
     },
-    dateOfBirth: Date,
+    dateOfBirth: {
+      type: Date,
+      required: [true, 'Date of birth is required'],
+    },
     email: {
       type: String,
       trim: true,
@@ -136,24 +155,6 @@ studentSchema.virtual('fullName').set(function (fullName: string) {
   this.name.middleName = middleName;
   this.name.lastName = lastName;
 });
-
-// document middleware
-// create a pre save middleware
-//  bcrypt password
-// studentSchema.pre('save', async function (next) {
-//   // console.log(this, ' post hook : we saved our data');
-//   const user = this;
-//   user.password = await bcrypt.hash(
-//     user.password,
-//     Number(config.bcrypt_salt_rounds),
-//   );
-//   next();
-// });
-// // create a post save middleware password hashing
-// studentSchema.post('save', async function (doc, next) {
-//   doc.password = '';
-//   next();
-// });
 
 // Query middleware
 studentSchema.pre('find', async function (next) {

@@ -6,7 +6,7 @@ import {
   Months,
 } from './academicSemester.constant';
 
-const academicSemesterSchema = new Schema(
+const academicSemesterSchema = new Schema<TAcademicSemester>(
   {
     name: {
       type: String,
@@ -20,7 +20,7 @@ const academicSemesterSchema = new Schema(
     },
     year: {
       type: String,
-      default: true,
+      required: true,
     },
     startMonth: {
       type: String,
