@@ -7,12 +7,18 @@ const createAcademicDepartmentInDB = async (payload: TAcademicDepartment) => {
   return result;
 };
 const getAllAcademicDepartmentFromDB = async () => {
-  const result = await AcademicDepartment.find();
+  const result = await AcademicDepartment.find().populate('academicFaculty');
   return result;
 };
 const getSingleAcademicDepartmentFromDB = async (_id: string) => {
-  const result = await AcademicDepartment.findOne({ _id });
-  //const result = await AcademicFaculty.aggregate([{ $match: { _id: _id } }]);
+  const result = await AcademicDepartment.findOne({ _id }).populate(
+    'academicFaculty',
+  );
+  // const objectId = new ObjectId(_id);
+  // const result = await AcademicDepartment.aggregate([
+  //   { $match: { _id: objectId } },
+  // ]);
+
   return result;
 };
 
@@ -20,9 +26,12 @@ const updateAcademicDepartmentFromDB = async (
   _id: string,
   updateFields: Partial<TAcademicDepartment>,
 ) => {
-  const result = await AcademicDepartment.updateOne(
+  const result = await AcademicDepartment.findOneAndUpdate(
     { _id },
     { $set: updateFields },
+    {
+      new: true,
+    },
   );
   return result;
 };
