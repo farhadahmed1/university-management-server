@@ -163,16 +163,16 @@ studentSchema.virtual('fullName').set(function (fullName: string) {
 });
 
 // Query middleware
-// student email validation
-// studentSchema.pre('save', async function (next) {
-//   const isStudentExist = await Student.findOne({
-//     email: this.email,
-//   });
-//   if (isStudentExist) {
-//     return next(new Error('This Student already exists'));
-//   }
-//   next();
-// });
+//student email validation
+studentSchema.pre('save', async function (next) {
+  const isStudentExist = await Student.findOne({
+    email: this.email,
+  });
+  if (isStudentExist) {
+    return next(new Error('This Student already exists'));
+  }
+  next();
+});
 studentSchema.pre('find', async function (next) {
   this.find({ isDeleted: { $ne: true } });
   next();
