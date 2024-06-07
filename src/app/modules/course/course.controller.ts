@@ -13,7 +13,7 @@ const createCourse = catchAsync(async (req, res) => {
 });
 
 const getAllCourses = catchAsync(async (req, res) => {
-  const result = await CourseServices.getAllCoursesFromBD(req.query);
+  const result = await CourseServices.getAllCoursesFromDB(req.query);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -24,7 +24,7 @@ const getAllCourses = catchAsync(async (req, res) => {
 
 const getSingleCourse = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await CourseServices.getSingleCourseFromBD(id);
+  const result = await CourseServices.getSingleCourseFromDB(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -35,7 +35,7 @@ const getSingleCourse = catchAsync(async (req, res) => {
 
 const deleteCourse = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await CourseServices.deleteCourseFromBD(id);
+  const result = await CourseServices.deleteCourseFromDB(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -43,6 +43,37 @@ const deleteCourse = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+const assignFacultiesWithCourse = catchAsync(async (req, res) => {
+  const { courseId } = req.params;
+  const { faculties } = req.body;
+  const result = await CourseServices.assignFacultiesWithCourseIntoDB(
+    courseId,
+    faculties,
+  );
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: ' Successfully Assign Faculties ',
+    data: result,
+  });
+});
+
+const removeFacultiesFromCourse = catchAsync(async (req, res) => {
+  const { courseId } = req.params;
+  const { faculties } = req.body;
+  const result = await CourseServices.removeFacultiesFromCourseFromDB(
+    courseId,
+    faculties,
+  );
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Faculties Remove Successfully ',
+    data: result,
+  });
+});
+
 const updateCourse = catchAsync(async (req, res) => {
   const { id } = req.params;
   const updateFields = req.body;
@@ -60,4 +91,6 @@ export const CourseController = {
   getSingleCourse,
   deleteCourse,
   updateCourse,
+  assignFacultiesWithCourse,
+  removeFacultiesFromCourse,
 };
