@@ -40,23 +40,54 @@ const deleteCourseFromBD = async (id: string) => {
   return result;
 };
 
-const updateCourseIntoDB = async (_id: string, payload: Partial<TCourse>) => {
-  const { preRequisiteCourses, ...remainingCourse } = payload;
+const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
+  const { preRequisiteCourses, ...remainingCourseData } = payload;
 
-  const modifiedUpdatedData: Record<string, unknown> = {
-    ...remainingCourse,
-  };
+  // const modifiedUpdatedData: Record<string, unknown> = {
+  //   ...remainingCourse,
+  // };
 
-  if (preRequisiteCourses && Object.keys(preRequisiteCourses).length) {
-    for (const [key, value] of Object.entries(preRequisiteCourses)) {
-      modifiedUpdatedData[`name.${key}`] = value;
-    }
+  // if (preRequisiteCourses && Object.keys(preRequisiteCourses).length) {
+  //   for (const [key, value] of Object.entries(preRequisiteCourses)) {
+  //     modifiedUpdatedData[`name.${key}`] = value;
+  //   }
+  // }
+
+  // step1 : basic course info update
+  const updateBasicCourseInfo = await Course.findByIdAndUpdate(
+    id,
+    remainingCourseData,
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+
+  // check  if there is any pre requisite courses to update
+  if (preRequisiteCourses && preRequisiteCourses.length > 0) {
+    // filter out the deleted files
+    const deletedPreRequisites = preRequisiteCourses
+      .filter((el) => el.course && el.isDeleted)
+      .map((el) => el.course);
+
+    const deletedPreRequisiteCourses = await Course.findByIdAndUpdate(id, {
+      $pull: {
+        preRequisiteCourses: {
+          course: { $in: deletedPreRequisites },
+        },
+      },
+    });
+    // filter out the new course fields
+    const newPreRequisites = preRequisiteCourses?.filter(
+      (el) => el.course && !el.isDeleted,
+    );
+    const newPreRequisiteCourses = await Course.findByIdAndUpdate(id, {
+      $addToSet: { preRequisiteCourses: { $each: newPreRequisites } },
+    });
   }
-
-  const result = await Course.findByIdAndUpdate({ _id }, modifiedUpdatedData, {
-    new: true,
-    runValidators: true,
-  });
+  const result = await Course.findById(id).populate(
+    'preRequisiteCourses.course',
+  );
   return result;
 };
 
