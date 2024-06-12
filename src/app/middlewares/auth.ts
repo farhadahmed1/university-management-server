@@ -4,9 +4,10 @@ import AppError from '../errors/AppError';
 import httpStatus from 'http-status';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
-import { tUserRole } from '../modules/user/user.interface';
+import { TUserRole } from '../modules/user/user.interface';
+import { User } from '../modules/user/user.model';
 
-const auth = (...requiredRoles: tUserRole[]) => {
+const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization;
     //  if the token is sent from the client
@@ -17,32 +18,64 @@ const auth = (...requiredRoles: tUserRole[]) => {
       );
     }
     // check if the token is valid
-    jwt.verify(
+    const decoded = jwt.verify(
       token,
       config.jwt_access_secret as string,
-      function (err, decoded) {
-        // err
+    ) as JwtPayload;
 
-        if (err) {
-          throw new AppError(
-            httpStatus.UNAUTHORIZED,
-            'You are not authorized person',
-          );
-        }
-        const role = (decoded as JwtPayload).role;
+    const { role, userId, iat } = decoded;
+    // const role = decoded.role;
+    // const id = decoded.userId;
+    const user = await User.isUserExistsByCustomId(userId);
 
-        if (requiredRoles && !requiredRoles.includes(role)) {
-          throw new AppError(
-            httpStatus.UNAUTHORIZED,
-            'You are not authorized person',
-          );
-        }
-        // decoded undefined
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, 'This user does not found !!');
+    }
+    // check if the user is already deleted
+    const isDeleted = user?.isDeleted;
+    if (isDeleted) {
+      throw new AppError(httpStatus.FORBIDDEN, 'This user is Deleted !!');
+    }
+    // checking if the user is blocked
+    const userStatus = user?.status;
+    if (userStatus === 'blocked') {
+      throw new AppError(httpStatus.FORBIDDEN, 'This user is Blocked !!');
+    }
 
-        req.user = decoded as JwtPayload;
-        next();
-      },
-    );
+    if (
+      user.passwordChangedAt &&
+      User.isJWTIssuedBeforePasswordChanged(
+        user.passwordChangedAt,
+        iat as number,
+      )
+    ) {
+      throw new AppError(
+        httpStatus.UNAUTHORIZED,
+        'You are not authorized user',
+      );
+    }
+    if (
+      user.passwordChangedAt &&
+      User.isJWTIssuedBeforePasswordChanged(
+        user.passwordChangedAt,
+        iat as number,
+      )
+    ) {
+      throw new AppError(
+        httpStatus.UNAUTHORIZED,
+        'You are not authorized user!',
+      );
+    }
+
+    if (requiredRoles && !requiredRoles.includes(role)) {
+      throw new AppError(
+        httpStatus.UNAUTHORIZED,
+        'You are not authorized person',
+      );
+    }
+    // decoded undefined
+    req.user = decoded as JwtPayload;
+    next();
   });
 };
 
