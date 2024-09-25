@@ -87,7 +87,10 @@ const changePassword = async (
   );
   return null;
 };
+
+const refreshToken = async (token: string) => {};
 export const AuthServices = {
   loginUser,
   changePassword,
+  refreshToken,
 };
