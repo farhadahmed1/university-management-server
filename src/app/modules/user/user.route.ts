@@ -13,7 +13,7 @@ const router = express.Router();
 // will call controller function
 router.post(
   '/create-student',
-  auth(USER_ROLL.admin),
+  auth(USER_ROLL.admin, USER_ROLL.faculty),
   validateRequest(studentValidations.createStudentValidationSchema),
   UserController.createStudent,
 );
