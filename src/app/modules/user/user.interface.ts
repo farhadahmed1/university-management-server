@@ -4,6 +4,7 @@ import { USER_ROLL } from './user.constant';
 
 export interface TUser {
   id: string;
+  email: string;
   password: string;
   needsPasswordChange: boolean;
   passwordChangedAt?: Date;

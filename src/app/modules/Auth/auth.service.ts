@@ -38,6 +38,15 @@ const loginUser = async (payload: TLoginUser) => {
   const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
     expiresIn: '10d',
   });
+
+  const refreshToken = jwt.sign(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    {
+      expiresIn: '10d',
+    },
+  );
+
   return {
     accessToken,
     needsPasswordChange: user?.needsPasswordChange,
@@ -88,7 +97,10 @@ const changePassword = async (
   return null;
 };
 
-const refreshToken = async (token: string) => {};
+const refreshToken = () => async (token: string) => {
+  const decoded = verifyToken(token, config.jwt_refresh_secret as string);
+};
+
 export const AuthServices = {
   loginUser,
   changePassword,
