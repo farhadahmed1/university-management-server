@@ -11,4 +11,5 @@ export default {
   default_password: process.env.DEFAULT_PASS,
   jwt_access_secret: process.env.ACCESS_JWT_SECRET,
   Jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
+  jwt_refresh_secret: process.env.REFRESH_JWT_SECRET,
 };
