@@ -9,19 +9,23 @@ const createAcademicSemester = catchAsync(async (req, res) => {
     await AcademicSemesterServices.createAcademicSemesterIntoDB(
       academicSemesterData,
     );
-  res.status(200).json({
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
     success: true,
     message: 'Academic semester is created successfully',
     data: result,
   });
 });
 const getAllAcademicSemester = catchAsync(async (req, res) => {
-  const result = await AcademicSemesterServices.getAllAcademicSemesterIntoDB();
+  const result = await AcademicSemesterServices.getAllAcademicSemesterIntoDB(
+    req.query,
+  );
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Academic semester are received successfully',
-    data: result,
+    //meta: result.meta,
+    data: result.result,
   });
 });
 
