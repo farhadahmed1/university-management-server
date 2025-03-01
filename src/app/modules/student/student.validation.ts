@@ -122,7 +122,7 @@ const updateStudentValidationSchema = z.object({
         if (typeof arg === 'string' || arg instanceof Date)
           return new Date(arg);
       }, z.date().optional()),
-      email: z.string().trim().email('Please enter a valid email').optional(),
+      email: z.string().optional(),
       contactNo: z.string().optional(),
       emergencyContact: z.string().optional(),
       bloodGroup: z
