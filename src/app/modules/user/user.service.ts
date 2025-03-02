@@ -58,7 +58,7 @@ const createStudentIntoDB = async (
   );
 
   if (!academicDepartment) {
-    throw new AppError(400, 'Aademic department not found');
+    throw new AppError(400, 'Academic department not found');
   }
   payload.academicFaculty = academicDepartment.academicFaculty;
 
